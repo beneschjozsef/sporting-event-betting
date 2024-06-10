@@ -48,6 +48,22 @@ class AuthController extends BaseController
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        return response()->json(['message' => 'Login successful']);
+        $token = bin2hex(random_bytes(32));
+        $user->setApiToken($token);
+        $this->entityManager->flush();
+
+        return response()->json(['token' => $token]);
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        if ($user) {
+            $user->setApiToken(null);
+            $this->entityManager->flush();
+            return response()->json(['message' => 'Logged out successfully']);
+        }
+
+        return response()->json(['message' => 'User not authenticated'], 401);
     }
 }

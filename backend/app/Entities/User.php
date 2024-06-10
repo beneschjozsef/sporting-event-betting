@@ -32,6 +32,11 @@ class User
      */
     protected $password;
 
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $api_token;
+
     // Getters and Setters...
 
     public function getId()
@@ -67,5 +72,15 @@ class User
     public function setPassword($password)
     {
         $this->password = $password;
+    }
+
+    public function getApiToken()
+    {
+        return $this->api_token;
+    }
+
+    public function setApiToken($api_token)
+    {
+        $this->api_token = $api_token;
     }
 }

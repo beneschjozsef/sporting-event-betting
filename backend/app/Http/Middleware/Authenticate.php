@@ -3,41 +3,38 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Auth\Factory as Auth;
+use App\Entities\User;
+use Doctrine\ORM\EntityManagerInterface;
+use Illuminate\Http\Request;
 
 class Authenticate
 {
-    /**
-     * The authentication guard factory instance.
-     *
-     * @var \Illuminate\Contracts\Auth\Factory
-     */
-    protected $auth;
+    protected $entityManager;
 
-    /**
-     * Create a new middleware instance.
-     *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth
-     * @return void
-     */
-    public function __construct(Auth $auth)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->auth = $auth;
+        $this->entityManager = $entityManager;
     }
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string|null  $guard
-     * @return mixed
-     */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next)
     {
-        if ($this->auth->guard($guard)->guest()) {
-            return response('Unauthorized.', 401);
+        $token = $request->bearerToken();
+
+
+        if (!$token) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['api_token' => $token]);
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // A hitelesített felhasználó hozzáadása a kéréshez
+        $request->setUserResolver(function () use ($user) {
+            return $user;
+        });
 
         return $next($request);
     }

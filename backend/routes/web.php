@@ -21,3 +21,7 @@ $router->get('/products', 'ProductController@index
 ');
 $router->post('/register', 'AuthController@register');
 $router->post('/login', 'AuthController@login');
+
+$router->get('/protected', ['middleware' => 'auth', function () {
+    return response()->json(['message' => 'This is a protected route']);
+}]);
