@@ -6,32 +6,27 @@ use Closure;
 use App\Entities\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
+use App\Services\TokenService;
 
 class Authenticate
 {
     protected $entityManager;
+    protected $tokenService;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, TokenService $tokenService)
     {
         $this->entityManager = $entityManager;
+        $this->tokenService = $tokenService;
     }
 
     public function handle(Request $request, Closure $next)
     {
-        $token = $request->bearerToken();
-
-
-        if (!$token) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['api_token' => $token]);
+        $user = $this->tokenService->getUserByToken($request->bearerToken());
 
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        // A hitelesített felhasználó hozzáadása a kéréshez
         $request->setUserResolver(function () use ($user) {
             return $user;
         });

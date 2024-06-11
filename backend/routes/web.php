@@ -17,11 +17,20 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->get('/products', 'ProductController@index
-');
 $router->post('/register', 'AuthController@register');
 $router->post('/login', 'AuthController@login');
 
+//For test
 $router->get('/protected', ['middleware' => 'auth', function () {
     return response()->json(['message' => 'This is a protected route']);
 }]);
+
+//Events
+$router->post('/events', 'EventController@createEvent');
+$router->put('/events/{eventId}', 'EventController@editEvent');
+$router->delete('/events/{eventId}', 'EventController@deleteEvent');
+$router->get('/events/{eventId}', 'EventController@getEvent');
+$router->get('/events', 'EventController@listEvents');
+
+//Guess
+$router->post('/guesses', ['middleware' => 'auth', 'uses' => 'GuessController@createGuess']);

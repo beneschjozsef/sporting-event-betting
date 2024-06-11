@@ -6,8 +6,8 @@ return [
             base_path('app/Entities')
         ],
         'auto_generate_proxies' => true,
-        'proxy_dir' => null,
-        'proxy_namespace' => null,
+        'proxies_dir' => storage_path('proxies'),
+        'proxies_namespace' => 'App\Proxies',
         'annotation_reader' => null,
     ],
     'connections' => [
