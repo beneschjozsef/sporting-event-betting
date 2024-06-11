@@ -40,7 +40,7 @@ class EventController extends Controller
 
         $event = $this->eventService->createEvent($title, $date, $user, $participantsData);
 
-        return response()->json($event);
+        return response()->json($this->getSerializedEvent($event));
     }
 
     public function editEvent(Request $request, $eventId)
@@ -71,9 +71,8 @@ class EventController extends Controller
 
         $updatedEvent = $this->eventService->editEvent($event, $title, $date, $participantsData);
 
-        return response()->json($updatedEvent);
+        return response()->json($this->getSerializedEvent($updatedEvent));
     }
-
 
     public function deleteEvent(Request $request, $eventId)
     {
@@ -113,34 +112,29 @@ class EventController extends Controller
     {
         $events = $this->eventService->listEvents();
 
-        foreach ($events as $event) {
-            $this->entityManager->initializeObject($event->getCreator());
-        }
-
-        return response()->json($this->serializeEvents($events));
-    }
-
-    private function serializeEvents($events)
-    {
-        $serializedEvents = [];
-        foreach ($events as $event) {
-            $serializedEvents[] = $this->getSerializedEvent($event);
-        }
-        return $serializedEvents;
+        return response()->json($events);
     }
 
     private function getSerializedEvent(Event $event)
     {
-        return
-            [
-                'id' => $event->getId(),
-                'title' => $event->getTitle(),
-                'date' => $event->getDate()->format('Y-m-d H:i:s'),
-                'creator' => [
-                    'id' => $event->getCreator()->getId(),
-                    'name' => $event->getCreator()->getName(),
-                    'email' => $event->getCreator()->getEmail(),
-                ],
-            ];
+        return [
+            'id' => $event->getId(),
+            'title' => $event->getTitle(),
+            'date' => $event->getDate()->format('Y-m-d H:i:s'),
+            'creator' => [
+                'id' => $event->getCreator()->getId(),
+                'name' => $event->getCreator()->getName(),
+                'email' => $event->getCreator()->getEmail(),
+            ],
+            'participants' => array_map(function ($participant) {
+                return [
+                    'id '  => $participant->getId(),
+                    'name' => $participant->getName(),
+                    'role' => $participant->getRole(),
+                    'description' => $participant->getDescription(),
+                    'tipsCount' => $this->eventService->countTipsForParticipant($participant),
+                ];
+            }, $event->getParticipants()->toArray()),
+        ];
     }
 }

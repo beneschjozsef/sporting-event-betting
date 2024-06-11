@@ -8,6 +8,7 @@ use App\Entities\Event;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entities\User;
 use App\Entities\Participant;
+use App\Entities\Guess;
 
 class EventManagementService
 {
@@ -58,7 +59,6 @@ class EventManagementService
             $participant->setDescription($participantData['description'] ?? null);
 
             $this->entityManager->persist($participant);
-
             $event->addParticipant($participant);
         }
 
@@ -67,7 +67,6 @@ class EventManagementService
 
         return $event;
     }
-
 
     public function deleteEvent(Event $event): void
     {
@@ -86,6 +85,50 @@ class EventManagementService
 
     public function listEvents(): array
     {
-        return $this->entityManager->getRepository(Event::class)->findAll();
+        $events = $this->entityManager->getRepository(Event::class)->findAll();
+        $result = [];
+
+        foreach ($events as $event) {
+            $eventData = [
+                'id' => $event->getId(),
+                'title' => $event->getTitle(),
+                'date' => $event->getDate()->format('Y-m-d H:i:s'),
+                'creator' => [
+                    'id' => $event->getCreator()->getId(),
+                    'name' => $event->getCreator()->getName(),
+                    'email' => $event->getCreator()->getEmail(),
+                ],
+                'participants' => [],
+            ];
+
+            foreach ($event->getParticipants() as $participant) {
+                $tipsCount = $this->countTipsForParticipant($participant);
+
+                $participantData = [
+                    'id' => $participant->getId(),
+                    'name' => $participant->getName(),
+                    'role' => $participant->getRole(),
+                    'description' => $participant->getDescription(),
+                    'tipsCount' => $tipsCount,
+                ];
+
+                $eventData['participants'][] = $participantData;
+            }
+
+            $result[] = $eventData;
+        }
+
+        return $result;
+    }
+
+    public function countTipsForParticipant(Participant $participant): int
+    {
+        return (int) $this->entityManager->createQueryBuilder()
+            ->select('count(t.id)')
+            ->from(Guess::class, 't')
+            ->where('t.participant = :participant')
+            ->setParameter('participant', $participant)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

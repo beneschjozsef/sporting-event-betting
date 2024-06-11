@@ -54,7 +54,14 @@ export default {
   deleteEvent(id: number): Promise<AxiosResponse<unknown>> {
     return apiClient.delete(`/events/${id}`);
   },
-  makeGuess(guess: Guess): Promise<AxiosResponse<unknown>> {
-    return apiClient.post("/guesses", guess);
+  makeGuess(guess: Guess, config = {}): Promise<AxiosResponse<unknown>> {
+    return apiClient.post("/guesses", guess, config);
+  },
+  fetchUser(token: string): Promise<AxiosResponse<User>> {
+    return apiClient.get("/user", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   },
 };

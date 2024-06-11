@@ -1,4 +1,3 @@
-// src/store/index.ts
 import { createStore } from "vuex";
 import apiService from "../services/apiService";
 
@@ -6,6 +5,7 @@ export interface State {
   events: any[];
   eventDetails: any | null;
   user: any | null;
+  token: string | null;
 }
 
 const store = createStore<State>({
@@ -13,6 +13,7 @@ const store = createStore<State>({
     events: [],
     eventDetails: null,
     user: null,
+    token: localStorage.getItem("token"),
   },
   mutations: {
     setEvents(state, events) {
@@ -23,6 +24,15 @@ const store = createStore<State>({
     },
     setUser(state, user) {
       state.user = user;
+    },
+    setToken(state, token) {
+      state.token = token;
+      localStorage.setItem("token", token);
+    },
+    clearUser(state) {
+      state.user = null;
+      state.token = null;
+      localStorage.removeItem("token");
     },
   },
   actions: {
@@ -52,7 +62,24 @@ const store = createStore<State>({
     },
     async login({ commit }, credentials) {
       const response = await apiService.login(credentials);
-      commit("setUser", response.data);
+      const token = response.data.token;
+      commit("setToken", token);
+      //const userResponse = await apiService.fetchUser(token);
+      //commit("setUser", userResponse.data);
+    },
+    async submitGuess({ state, dispatch }, { eventId, participantId }) {
+      if (!state.token) {
+        throw new Error("User is not authenticated");
+      }
+      await apiService.makeGuess(
+        { event_id: eventId, participant_id: participantId },
+        {
+          headers: {
+            Authorization: `Bearer ${state.token}`,
+          },
+        }
+      );
+      dispatch("fetchEvents"); // Refresh events to update tips count
     },
   },
 });
