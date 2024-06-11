@@ -96,16 +96,4 @@ class Event
     {
         return $this->participants;
     }
-
-
-    public function removeParticipant(Participant $participant)
-    {
-
-        foreach ($this->participants as $key => $eventParticipant) {
-            if ($eventParticipant->getParticipant() === $participant) {
-                $this->participants->remove($key);
-                break;
-            }
-        }
-    }
 }

@@ -19,6 +19,10 @@ $router->get('/', function () use ($router) {
 
 $router->post('/register', 'AuthController@register');
 $router->post('/login', 'AuthController@login');
+$router->post('/test', function () {
+    die('Reached route');
+});
+//$router->post('/login', ['middleware' => 'cors', 'uses' => 'AuthController@login']);
 
 //For test
 $router->get('/protected', ['middleware' => 'auth', function () {

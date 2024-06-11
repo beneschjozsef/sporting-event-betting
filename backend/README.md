@@ -11,7 +11,8 @@ Before you start using the application, you need to set up the necessary databas
 To launch the backend services, run:
 
 ```bash
-docker-compose up -d
+cd backend
+docker-compose up --build
 ```
 
 ### Create Tables
@@ -19,7 +20,7 @@ docker-compose up -d
 If you don't already have the database tables created, use this command:
 
 ```bash
-php artisan make:migration create_products_table
+docker-compose run backend php artisan doctrine:migrations:migrate
 ```
 
 ### Additional Information
@@ -32,6 +33,9 @@ The following commands are not necessary for initial setup but can be useful for
 php artisan doctrine:clear:metadata:cache
 php artisan doctrine:clear:query:cache
 php artisan doctrine:clear:result:cache
+
+#migrate tables locally
+php artisan make:migration:migrate
 
 # Generate Autoload
 composer dump-autoload

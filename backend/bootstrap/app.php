@@ -78,9 +78,18 @@ $app->configure('doctrine_migrations');
 //     App\Http\Middleware\ExampleMiddleware::class
 // ]);
 
+/* $app->middleware([
+    App\Http\Middleware\CorsMiddleware::class
+]); */
+
+/* $app->middleware([
+    App\Http\Middleware\CorsMiddleware::class,
+]); */
+
 $app->routeMiddleware([
-    'auth' => App\Http\Middleware\Authenticate::class,
+    'auth' => App\Http\Middleware\Authenticate::class
 ]);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -98,7 +107,6 @@ $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(LaravelDoctrine\ORM\DoctrineServiceProvider::class);
 $app->register(LaravelDoctrine\Migrations\MigrationsServiceProvider::class);
-
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
